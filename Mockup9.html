@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actualización de Clientes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .box {
+      border: 1px solid #000;
+      padding: 2rem;
+      max-width: 400px;
+      margin: 2rem auto;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .panel-box {
+      border: 1px solid #000;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 0;
+    }
+    .success { background-color: #d5e8d4; border-color: #82b366; }
+    .error { background-color: #f8d7da; border-color: #c9302c; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Formulario de Actualización -->
+    <div class="box">
+      <h3 class="text-center">Actualizar Cliente</h3>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" placeholder="correo@ejemplo.com">
+      </div>
+      <div class="mb-3">
+        <label for="telefono" class="form-label">Teléfono</label>
+        <input type="text" class="form-control" id="telefono" placeholder="987654321">
+      </div>
+      <div class="mb-3">
+        <label for="direccion" class="form-label">Dirección</label>
+        <input type="text" class="form-control" id="direccion" placeholder="Calle, N°">
+      </div>
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="nombre" placeholder="Ana">
+      </div>
+      <button id="btnActualizar" class="btn btn-primary w-100">Actualizar</button>
+    </div>
+
+    <!-- Mensaje de actualización -->
+    <div class="panel-box success" id="actualizacion-exitosa" style="display:none;">
+      <h5>Actualización exitosa</h5>
+      <p id="mensaje-datos"></p>
+    </div>
+
+    <!-- Datos incompletos -->
+    <div class="panel-box error" id="datos-incompletos" style="display:none;">
+      <h5>Datos incompletos</h5>
+      <p>Faltan datos obligatorios</p>
+    </div>
+
+  </div>
+
+  <script>
+    const btnActualizar = document.getElementById('btnActualizar');
+    const mensajeDatos = document.getElementById('mensaje-datos');
+    const emailInput = document.getElementById('email');
+    const telefonoInput = document.getElementById('telefono');
+    const direccionInput = document.getElementById('direccion');
+    const nombreInput = document.getElementById('nombre');
+
+    // Objeto para almacenar datos de clientes
+    const clientes = {};
+
+    // Rellenar campos si existe el cliente
+    emailInput.addEventListener('blur', () => {
+      const email = emailInput.value.trim();
+      if (clientes[email]) {
+        const cliente = clientes[email];
+        telefonoInput.value = cliente.telefono;
+        direccionInput.value = cliente.direccion;
+        nombreInput.value = cliente.nombre;
+      } else {
+        telefonoInput.value = '';
+        direccionInput.value = '';
+        nombreInput.value = '';
+      }
+    });
+
+    btnActualizar.addEventListener('click', () => {
+      const email = emailInput.value.trim();
+      const telefono = telefonoInput.value.trim();
+      const direccion = direccionInput.value.trim();
+      const nombre = nombreInput.value.trim();
+
+      // Ocultar paneles
+      document.getElementById('actualizacion-exitosa').style.display = 'none';
+      document.getElementById('datos-incompletos').style.display = 'none';
+
+      if (!email) {
+        alert('Debes ingresar un correo.');
+        return;
+      }
+
+      // Mostrar mensaje de datos incompletos solo si no se ingresa nada más que el correo
+      if (!telefono && !direccion && !nombre) {
+        document.getElementById('datos-incompletos').style.display = 'block';
+        return;
+      }
+
+      // Guardar datos del cliente
+      clientes[email] = {
+        telefono: telefono || '-',
+        direccion: direccion || '-',
+        nombre: nombre || '-'
+      };
+
+      // Mostrar mensaje con los datos actualizados
+      mensajeDatos.textContent = `Cliente ${email} actualizado con Teléfono: ${clientes[email].telefono}, Dirección: ${clientes[email].direccion}, Nombre: ${clientes[email].nombre}`;
+      document.getElementById('actualizacion-exitosa').style.display = 'block';
+
+      // Limpiar campos excepto email (para permitir edición parcial)
+      // emailInput.value = '';
+      telefonoInput.value = '';
+      direccionInput.value = '';
+      nombreInput.value = '';
+    });
+  </script>
+
+</body>
+</html>
