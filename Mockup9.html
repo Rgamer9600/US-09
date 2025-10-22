@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Actualización de Clientes</title>
+  <title>Gestión de Clientes</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .box {
       border: 1px solid #000;
       padding: 2rem;
-      max-width: 400px;
+      max-width: 450px;
       margin: 2rem auto;
       background-color: #fff;
       display: flex;
@@ -24,17 +24,18 @@
     }
     .success { background-color: #d5e8d4; border-color: #82b366; }
     .error { background-color: #f8d7da; border-color: #c9302c; }
+    .warning { background-color: #fff3cd; border-color: #ffc107; }
   </style>
 </head>
 <body>
   <div class="container">
 
-    <!-- Formulario de Actualización -->
+    <!-- Formulario -->
     <div class="box">
-      <h3 class="text-center">Actualizar Cliente</h3>
+      <h3 class="text-center">Gestión de Clientes</h3>
       <div class="mb-3">
         <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" placeholder="correo@ejemplo.com">
+        <input type="email" class="form-control" id="email" placeholder="correo@example.com">
       </div>
       <div class="mb-3">
         <label for="telefono" class="form-label">Teléfono</label>
@@ -46,90 +47,135 @@
       </div>
       <div class="mb-3">
         <label for="nombre" class="form-label">Nombre</label>
-        <input type="text" class="form-control" id="nombre" placeholder="Ana">
+        <input type="text" class="form-control" id="nombre" placeholder="Nombre completo">
       </div>
       <button id="btnActualizar" class="btn btn-primary w-100">Actualizar</button>
     </div>
 
-    <!-- Mensaje de actualización -->
-    <div class="panel-box success" id="actualizacion-exitosa" style="display:none;">
-      <h5>Actualización exitosa</h5>
-      <p id="mensaje-datos"></p>
+    <!-- Paneles de estado -->
+    <div class="panel-box success" id="panel-exito" style="display:none;">
+      <h5>Operación exitosa</h5>
+      <p id="mensaje-exito"></p>
     </div>
 
-    <!-- Datos incompletos -->
-    <div class="panel-box error" id="datos-incompletos" style="display:none;">
-      <h5>Datos incompletos</h5>
-      <p>Faltan datos obligatorios</p>
+    <div class="panel-box error" id="panel-error" style="display:none;">
+      <h5>Error</h5>
+      <p id="mensaje-error"></p>
+    </div>
+
+    <div class="panel-box warning" id="panel-aviso" style="display:none;">
+      <h5>Atención</h5>
+      <p id="mensaje-aviso"></p>
     </div>
 
   </div>
 
   <script>
-    const btnActualizar = document.getElementById('btnActualizar');
-    const mensajeDatos = document.getElementById('mensaje-datos');
-    const emailInput = document.getElementById('email');
-    const telefonoInput = document.getElementById('telefono');
-    const direccionInput = document.getElementById('direccion');
-    const nombreInput = document.getElementById('nombre');
+    const clientes = {
+      "lucia@example.com": { telefono: "987654321", direccion: "Av. Central 123", nombre: "Lucía Gómez", ultimaActualizacion: null },
+      "ana@example.com": { telefono: "998877665", direccion: "Calle Verde 45", nombre: "Ana Martínez", ultimaActualizacion: null },
+      "pedro@example.com": { telefono: "955443322", direccion: "", nombre: "Pedro Rojas", ultimaActualizacion: null }
+    };
 
-    // Objeto para almacenar datos de clientes
-    const clientes = {};
+    const email = document.getElementById("email");
+    const telefono = document.getElementById("telefono");
+    const direccion = document.getElementById("direccion");
+    const nombre = document.getElementById("nombre");
 
-    // Rellenar campos si existe el cliente
-    emailInput.addEventListener('blur', () => {
-      const email = emailInput.value.trim();
-      if (clientes[email]) {
-        const cliente = clientes[email];
-        telefonoInput.value = cliente.telefono;
-        direccionInput.value = cliente.direccion;
-        nombreInput.value = cliente.nombre;
+    const panelExito = document.getElementById("panel-exito");
+    const panelError = document.getElementById("panel-error");
+    const panelAviso = document.getElementById("panel-aviso");
+    const msgExito = document.getElementById("mensaje-exito");
+    const msgError = document.getElementById("mensaje-error");
+    const msgAviso = document.getElementById("mensaje-aviso");
+
+    const btnActualizar = document.getElementById("btnActualizar");
+
+    function ocultarPaneles() {
+      panelExito.style.display = "none";
+      panelError.style.display = "none";
+      panelAviso.style.display = "none";
+    }
+
+    function esCorreoValido(correo) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
+    }
+
+    // Cargar datos del cliente
+    email.addEventListener("blur", () => {
+      ocultarPaneles();
+      const correo = email.value.trim();
+
+      if (!esCorreoValido(correo)) {
+        panelError.style.display = "block";
+        msgError.textContent = "Correo inválido.";
+        return;
+      }
+
+      if (clientes[correo]) {
+        const c = clientes[correo];
+        telefono.value = c.telefono;
+        direccion.value = c.direccion;
+        nombre.value = c.nombre;
+
+        if (!c.telefono || !c.direccion || !c.nombre) {
+          panelError.style.display = "block";
+          msgError.textContent = "Faltan datos obligatorios para este cliente.";
+        } else {
+          panelExito.style.display = "block";
+          msgExito.textContent = `Datos completos para ${c.nombre}.`;
+        }
       } else {
-        telefonoInput.value = '';
-        direccionInput.value = '';
-        nombreInput.value = '';
+        telefono.value = "";
+        direccion.value = "";
+        nombre.value = "";
+        panelAviso.style.display = "block";
+        msgAviso.textContent = "Nuevo correo detectado. Por favor completa los datos.";
       }
     });
 
-    btnActualizar.addEventListener('click', () => {
-      const email = emailInput.value.trim();
-      const telefono = telefonoInput.value.trim();
-      const direccion = direccionInput.value.trim();
-      const nombre = nombreInput.value.trim();
+    // Actualizar o agregar cliente
+    btnActualizar.addEventListener("click", () => {
+      ocultarPaneles();
+      const correo = email.value.trim();
+      const tel = telefono.value.trim();
+      const dir = direccion.value.trim();
+      const nom = nombre.value.trim();
 
-      // Ocultar paneles
-      document.getElementById('actualizacion-exitosa').style.display = 'none';
-      document.getElementById('datos-incompletos').style.display = 'none';
-
-      if (!email) {
-        alert('Debes ingresar un correo.');
+      if (!esCorreoValido(correo)) {
+        panelError.style.display = "block";
+        msgError.textContent = "Correo inválido.";
         return;
       }
 
-      // Mostrar mensaje de datos incompletos solo si no se ingresa nada más que el correo
-      if (!telefono && !direccion && !nombre) {
-        document.getElementById('datos-incompletos').style.display = 'block';
+      if (!tel || !dir || !nom) {
+        panelError.style.display = "block";
+        msgError.textContent = "Faltan datos obligatorios.";
         return;
       }
 
-      // Guardar datos del cliente
-      clientes[email] = {
-        telefono: telefono || '-',
-        direccion: direccion || '-',
-        nombre: nombre || '-'
+      const ahora = new Date();
+      const fecha = ahora.toLocaleDateString();
+      const hora = ahora.toLocaleTimeString();
+
+      // Si ya existía, conserva la fecha anterior y actualiza a la nueva
+      const clienteExistente = clientes[correo];
+      clientes[correo] = {
+        telefono: tel,
+        direccion: dir,
+        nombre: nom,
+        ultimaActualizacion: clienteExistente ? `${fecha} a las ${hora}` : null
       };
 
-      // Mostrar mensaje con los datos actualizados
-      mensajeDatos.textContent = `Cliente ${email} actualizado con Teléfono: ${clientes[email].telefono}, Dirección: ${clientes[email].direccion}, Nombre: ${clientes[email].nombre}`;
-      document.getElementById('actualizacion-exitosa').style.display = 'block';
+      panelExito.style.display = "block";
 
-      // Limpiar campos excepto email (para permitir edición parcial)
-      // emailInput.value = '';
-      telefonoInput.value = '';
-      direccionInput.value = '';
-      nombreInput.value = '';
+      let mensaje = `Cliente ${nom} (${correo}) actualizado con:\nTeléfono: ${tel}, Dirección: ${dir}.`;
+      if (clienteExistente && clienteExistente.ultimaActualizacion) {
+        mensaje += `\nÚltima actualización registrada el ${clienteExistente.ultimaActualizacion}.`;
+      }
+
+      msgExito.textContent = mensaje;
     });
   </script>
-
 </body>
 </html>
